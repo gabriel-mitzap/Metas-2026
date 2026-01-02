@@ -539,35 +539,34 @@ if EDITOR_VERSION_KEY not in st.session_state:
 editor_key = f"data_editor_metas_{st.session_state[EDITOR_VERSION_KEY]}"
 
 # -----------------------------
-# Paywall (st_paywall)
+# Paywall (senha)
 # -----------------------------
-try:
-    from st_paywall import add_auth
-except Exception:
+if "logged_in" not in st.session_state:
+    st.session_state["logged_in"] = False
+
+app_password = st.secrets.get("APP_PASSWORD") if "APP_PASSWORD" in st.secrets else None
+
+if not st.session_state["logged_in"]:
     st.title("Metas 2026")
     st.subheader("Acesso restrito")
-    st.info(
-        "Configure `st_paywall` em `.streamlit/secrets.toml` para habilitar o acesso."
-    )
-    st.code(
-        "payment_provider = \"stripe\"\n"
-        "testing_mode = true\n"
-        "stripe_api_key_test = \"sk_test_...\"\n"
-        "stripe_link_test = \"https://buy.stripe.com/...\"\n"
-        "# Para produção:\n"
-        "# stripe_api_key = \"sk_live_...\"\n"
-        "# stripe_link = \"https://buy.stripe.com/...\"\n",
-        language="toml",
-    )
-    st.stop()
+    st.write("Digite a senha para acessar o dashboard.")
 
-add_auth(
-    required=True,
-    show_redirect_button=True,
-    subscription_button_text="Assinar para continuar",
-    button_color="#10b981",
-    use_sidebar=True,
-)
+    with st.form("login_form"):
+        password = st.text_input("Senha", type="password")
+        submitted = st.form_submit_button("Entrar")
+
+    if submitted:
+        if app_password and password == app_password:
+            st.session_state["logged_in"] = True
+            st.success("Login realizado.")
+            st.rerun()
+        else:
+            st.error("Senha incorreta.")
+
+    if not app_password:
+        st.info("Defina `APP_PASSWORD` em `st.secrets` para habilitar o login.")
+
+    st.stop()
 
 # -----------------------------
 # Sidebar (Structured Design)
