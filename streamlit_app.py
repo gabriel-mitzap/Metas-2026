@@ -426,6 +426,55 @@ st.markdown(
         background: #ffffff !important;
         border: 1px solid #cbd5e1 !important;
       }
+
+      /* Mobile responsiveness */
+      @media (max-width: 768px) {
+        .block-container {
+          padding-left: 1rem !important;
+          padding-right: 1rem !important;
+          padding-top: 1.25rem !important;
+          padding-bottom: 1.25rem !important;
+        }
+
+        h1 {
+          font-size: 2rem !important;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+          height: 40px !important;
+          font-size: 0.9rem !important;
+        }
+
+        [data-testid="stVerticalBlockBorderWrapper"] {
+          padding: 1rem !important;
+        }
+
+        .kpi-card .value {
+          font-size: 1.4rem !important;
+        }
+
+        [data-testid="stPlotlyChart"] {
+          padding: 0.5rem !important;
+        }
+
+        [data-testid="stDataEditor"] {
+          padding: 0.5rem !important;
+        }
+
+        [data-testid="stDataEditor"] [role="columnheader"],
+        [data-testid="stDataFrame"] [role="columnheader"] {
+          font-size: 0.9rem !important;
+          padding-top: 0.35rem !important;
+          padding-bottom: 0.35rem !important;
+        }
+
+        [data-testid="stDataEditor"] [role="gridcell"],
+        [data-testid="stDataFrame"] [role="gridcell"] {
+          font-size: 0.9rem !important;
+          padding-top: 0.35rem !important;
+          padding-bottom: 0.35rem !important;
+        }
+      }
     </style>
     """,
     unsafe_allow_html=True,
