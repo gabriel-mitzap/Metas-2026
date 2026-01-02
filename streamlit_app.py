@@ -976,6 +976,28 @@ with tab_data:
             st.session_state[EDITOR_VERSION_KEY] += 1
             st.rerun()
 
+
+st.set_page_config(page_icon='🗡', page_title='Streamlit Paywall Example')
+
+st.markdown('## Chat with Tyrion Lannister ⚔️')
+col1, col2 = st.columns((2,1))
+with col1:
+    st.markdown(
+        f"""
+        Chat with Tyrion Lannister to advise you on:
+        - Office Politics
+        - War Strategy
+        - The Targaryens
+
+
+        #### [Sign Up Now 🤘🏻]({config('https://buy.stripe.com/test_eVqeVc2Ml8Ztfpd6PS1Nu00')})
+        """
+    )
+with col2:
+    image = Image.open('./assets/DALL·E 2023-01-08 17.53.04 - futuristic knight robot on a horse in cyberpunk theme.png')
+    st.image(image)
+
+
 st.markdown('### Already have an Account? Login Below👇🏻')
 with st.form("login_form"):
     st.write("Login")
