@@ -483,8 +483,8 @@ st.markdown(
 # -----------------------------
 # Schema + state
 # -----------------------------
-REQUIRED_COLS = ["Area", "Atividade", "Meta", "Completo"]
-BASE_COLS_DEFAULT = ["Area", "Atividade", "Meta", "Completo"]
+REQUIRED_COLS = ["Área", "Atividade", "Meta", "Completo"]
+BASE_COLS_DEFAULT = ["Área", "Atividade", "Meta", "Completo"]
 
 DF_KEY = "df_base_metas"
 UPLOAD_NAME_KEY = "last_upload_name_metas"
@@ -502,7 +502,7 @@ def clean_df(raw: pd.DataFrame) -> pd.DataFrame:
     for col in df.columns:
         key = col.strip().lower()
         if key in ("área", "area", "a?rea"):
-            rename_map[col] = "Area"
+            rename_map[col] = "Área"
         elif key == "atividade":
             rename_map[col] = "Atividade"
         elif key == "meta":
@@ -513,14 +513,14 @@ def clean_df(raw: pd.DataFrame) -> pd.DataFrame:
         df = df.rename(columns=rename_map)
     for c in REQUIRED_COLS:
         if c not in df.columns:
-            df[c] = "" if c in ["Area", "Atividade"] else 0.0
+            df[c] = "" if c in ["Área", "Atividade"] else 0.0
     df["Meta"] = pd.to_numeric(df["Meta"], errors="coerce").fillna(0.0)
     df["Completo"] = pd.to_numeric(df["Completo"], errors="coerce").fillna(0.0)
-    df["Area"] = df["Area"].astype(str)
+    df["Área"] = df["Área"].astype(str)
     df["Atividade"] = df["Atividade"].astype(str)
     df = df[
         ~(
-            (df["Area"].str.strip() == "")
+            (df["Área"].str.strip() == "")
             & (df["Atividade"].str.strip() == "")
             & (df["Meta"] == 0)
             & (df["Completo"] == 0)
@@ -537,36 +537,6 @@ if EDITOR_VERSION_KEY not in st.session_state:
     st.session_state[EDITOR_VERSION_KEY] = 0
 
 editor_key = f"data_editor_metas_{st.session_state[EDITOR_VERSION_KEY]}"
-
-# -----------------------------
-# Paywall (senha)
-# -----------------------------
-if "logged_in" not in st.session_state:
-    st.session_state["logged_in"] = False
-
-app_password = st.secrets.get("APP_PASSWORD") if "APP_PASSWORD" in st.secrets else None
-
-if not st.session_state["logged_in"]:
-    st.title("Metas 2026")
-    st.subheader("Acesso restrito")
-    st.write("Digite a senha para acessar o dashboard.")
-
-    with st.form("login_form"):
-        password = st.text_input("Senha", type="password")
-        submitted = st.form_submit_button("Entrar")
-
-    if submitted:
-        if app_password and password == app_password:
-            st.session_state["logged_in"] = True
-            st.success("Login realizado.")
-            st.rerun()
-        else:
-            st.error("Senha incorreta.")
-
-    if not app_password:
-        st.info("Defina `APP_PASSWORD` em `st.secrets` para habilitar o login.")
-
-    st.stop()
 
 # -----------------------------
 # Sidebar (Structured Design)
@@ -588,12 +558,12 @@ with st.sidebar:
     # Quick Update
     if not st.session_state[DF_KEY].empty:
         current_df = st.session_state[DF_KEY].copy()
-        areas = current_df["Area"].unique()
+        areas = current_df["Área"].unique()
         
         for area in sorted(areas):
-            area_data = current_df[current_df["Area"] == area]
+            area_data = current_df[current_df["Área"] == area]
             
-            with st.expander(f"Area: {area}", expanded=False):
+            with st.expander(f"Área: {area}", expanded=False):
                 for idx, row in area_data.iterrows():
                     atividade = row["Atividade"]
                     meta = row["Meta"]
@@ -645,7 +615,7 @@ if not df.empty:
     ok = df["Meta"] > 0
     df.loc[ok, "Progresso_%"] = (df.loc[ok, "Completo"] / df.loc[ok, "Meta"]) * 100
     df["Progresso_%"] = df["Progresso_%"].clip(0, 100).round(1)
-    area_ratio = df.groupby("Area", as_index=False).agg(
+    area_ratio = df.groupby("Área", as_index=False).agg(
         Meta_total=("Meta", "sum"),
         Completo_total=("Completo", "sum"),
     )
@@ -656,9 +626,9 @@ if not df.empty:
     )
     progresso_geral = float(area_ratio["Area_ratio"].mean() * 100.0) if len(area_ratio) else 0.0
     area_sorted = area_ratio.sort_values("Area_ratio", ascending=False).reset_index(drop=True)
-    top_area = area_sorted.loc[0, "Area"] if len(area_sorted) else "-"
+    top_area = area_sorted.loc[0, "Área"] if len(area_sorted) else "-"
     top_area_val = float(area_sorted.loc[0, "Area_ratio"] * 100.0) if len(area_sorted) else 0.0
-    low_area = area_sorted.loc[len(area_sorted) - 1, "Area"] if len(area_sorted) else "-"
+    low_area = area_sorted.loc[len(area_sorted) - 1, "Área"] if len(area_sorted) else "-"
     low_area_val = float(area_sorted.loc[len(area_sorted) - 1, "Area_ratio"] * 100.0) if len(area_sorted) else 0.0
 else:
     progresso_geral, top_area, top_area_val, low_area, low_area_val = 0.0, "-", 0.0, "-", 0.0
@@ -671,7 +641,7 @@ def render_kpis() -> None:
             f'<div class="kpi-card kpi-accent">'
             f'<div class="label">Progresso Geral</div>'
             f'<div class="value">{progresso_geral:0.1f}%</div>'
-            f'<div class="sub">Média das Areas</div>'
+            f'<div class="sub">Média das Áreas</div>'
             f"</div>",
             unsafe_allow_html=True,
         )
@@ -826,7 +796,7 @@ def build_resumo_chart(resumo_df: pd.DataFrame) -> go.Figure:
     fig = go.Figure()
     
     fig.add_bar(
-        y=r["Area"],
+        y=r["Área"],
         x=[100] * len(r),
         orientation="h",
         name="Meta (100%)",
@@ -836,7 +806,7 @@ def build_resumo_chart(resumo_df: pd.DataFrame) -> go.Figure:
     )
     
     fig.add_bar(
-        y=r["Area"],
+        y=r["Área"],
         x=r["Progresso_%"].clip(0, 100),
         orientation="h",
         marker=dict(color=colors),
@@ -920,15 +890,15 @@ with tab_prog:
     if df.empty:
         st.info('Suba um CSV ou adicione linhas em "Dados".')
     else:
-        st.subheader("Progresso por Area")
-        areas = sorted(df["Area"].dropna().unique().tolist())
-        show_areas = st.pills("Filtrar Areas", areas, default=areas, selection_mode="multi")
+        st.subheader("Progresso por Área")
+        areas = sorted(df["Área"].dropna().unique().tolist())
+        show_areas = st.pills("Filtrar Áreas", areas, default=areas, selection_mode="multi")
         
         if not show_areas:
-            st.warning("Selecione pelo menos 1 Area.")
+            st.warning("Selecione pelo menos 1 Área.")
         else:
             for area in show_areas:
-                area_df = df[df["Area"] == area]
+                area_df = df[df["Área"] == area]
                 with st.container(border=True):
                     col1, col2 = st.columns([0.95, 0.05])
                     with col1:
@@ -941,7 +911,7 @@ with tab_sum:
         st.info('Suba um CSV ou adicione linhas em "Dados".')
     else:
         st.subheader("Resumo Geral")
-        resumo = df.groupby("Area", as_index=False).agg(
+        resumo = df.groupby("Área", as_index=False).agg(
             Meta_total=("Meta", "sum"),
             Completo_total=("Completo", "sum"),
         )
@@ -974,7 +944,7 @@ with tab_data:
             height=520,
             key=editor_key,
             column_config={
-                "Area": st.column_config.TextColumn("Area", required=True, width="medium"),
+                "Área": st.column_config.TextColumn("Área", required=True, width="medium"),
                 "Atividade": st.column_config.TextColumn("Atividade", required=True, width="large"),
                 "Meta": st.column_config.NumberColumn("Meta", min_value=0.0, step=1.0, width="small"),
                 "Completo": st.column_config.NumberColumn("Completo", min_value=0.0, step=1.0, width="small"),
@@ -1005,3 +975,49 @@ with tab_data:
             st.session_state[DF_KEY] = cleaned
             st.session_state[EDITOR_VERSION_KEY] += 1
             st.rerun()
+
+
+st.set_page_config(page_icon='🗡', page_title='Streamlit Paywall Example')
+
+st.markdown('## Chat with Tyrion Lannister ⚔️')
+col1, col2 = st.columns((2,1))
+with col1:
+    st.markdown(
+        f"""
+        Chat with Tyrion Lannister to advise you on:
+        - Office Politics
+        - War Strategy
+        - The Targaryens
+
+
+        #### [Sign Up Now 🤘🏻]({config('https://buy.stripe.com/test_eVqeVc2Ml8Ztfpd6PS1Nu00')})
+        """
+    )
+with col2:
+    image = Image.open('./assets/DALL·E 2023-01-08 17.53.04 - futuristic knight robot on a horse in cyberpunk theme.png')
+    st.image(image)
+
+
+st.markdown('### Already have an Account? Login Below👇🏻')
+with st.form("login_form"):
+    st.write("Login")
+    email = st.text_input('Enter Your Email')
+    password = st.text_input('Enter Your Password')
+    submitted = st.form_submit_button("Login")
+
+
+if submitted:
+    if password == config('SECRET_PASSWORD'):
+        st.session_state['logged_in'] = True
+        st.text('Succesfully Logged In!')
+    else:
+        st.text('Incorrect, login credentials.')
+        st.session_state['logged_in'] = False
+
+
+if 'logged_in' in st.session_state.keys():
+    if st.session_state['logged_in']:
+        st.markdown('## Ask Me Anything')
+        question = st.text_input('Ask your question')
+        if question != '':
+            st.write('I drink and I know things.')
